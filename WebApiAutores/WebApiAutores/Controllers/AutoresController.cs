@@ -16,6 +16,20 @@ namespace WebApiAutores.Controllers
         }
 
         [HttpGet]
+        [HttpGet("listado")]
+        [HttpGet("/listado")]
+        public async Task<List<Autor>> Gett()
+        {
+            return await _context.Autores.Include(a => a.Libros).ToListAsync();
+        }
+
+        [HttpGet("primero")]
+        public async Task<ActionResult<Autor>> PrimerAutor()
+        {
+            return await _context.Autores.FirstOrDefaultAsync();
+        }
+
+        [HttpGet]
         public async Task<ActionResult<List<Autor>>> Get()
         {
             return await _context.Autores.Include(a => a.Libros).ToListAsync();
