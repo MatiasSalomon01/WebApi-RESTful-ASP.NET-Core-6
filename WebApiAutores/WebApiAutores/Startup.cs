@@ -1,4 +1,6 @@
-﻿namespace WebApiAutores
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace WebApiAutores
 {
     public class Startup
     {
@@ -12,6 +14,9 @@
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddDbContext<ApplicationDbContext>(options => 
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
         }
