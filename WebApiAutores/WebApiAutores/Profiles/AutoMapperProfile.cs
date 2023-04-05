@@ -10,6 +10,9 @@ namespace WebApiAutores.Profiles
         {
             CreateMap<AutorCreacionDTO, Autor>();
             CreateMap<Autor, AutorDTO>();
+
+            CreateMap<LibroCreacionDTO, Libro>();
+            CreateMap<Libro, LibroDTO>();
         }  
     }
 }
