@@ -15,28 +15,25 @@ namespace WebApiAutores.Controllers
             _context = context;
         }
 
-        //[HttpGet]
-        //[HttpGet("listado")]
-        //[HttpGet("/listado")]
-        //public async Task<List<Autor>> Gett()
-        //{
-        //    return await _context.Autores.Include(a => a.Libros).ToListAsync();
-        //}
-
-        //[HttpGet("primero")]
-        //public async Task<ActionResult<Autor>> PrimerAutor()
-        //{
-        //    return await _context.Autores.FirstOrDefaultAsync();
-        //}
-
         [HttpGet]
-        public async Task<ActionResult<List<Autor>>> Get()
+        public async Task<ActionResult<List<Autor>>> GetAll()
         {
-            return await _context.Autores.Include(a => a.Libros).ToListAsync();
+            var result = await _context.Autores.ToListAsync();
+            if (result == null) return NotFound();
+            return result;
         }
 
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Autor>> GetById(int id)
+        {
+            var result = await _context.Autores.FirstOrDefaultAsync(a => a.Id == id);
+            if (result == null) return NotFound();
+            return result;
+        }
+
+
         [HttpPost]
-        public async Task<ActionResult> Post(Autor autor)
+        public async Task<ActionResult> Create(Autor autor)
         {
             _context.Autores.Add(autor);
             await _context.SaveChangesAsync();
@@ -44,7 +41,7 @@ namespace WebApiAutores.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> Put(Autor autor, int id)
+        public async Task<ActionResult> Update(Autor autor, int id)
         {
             if (autor.Id != id) return BadRequest("El id del autor no coincide con la URL");
 
