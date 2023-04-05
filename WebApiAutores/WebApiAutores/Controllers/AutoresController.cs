@@ -20,19 +20,19 @@ namespace WebApiAutores.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Autor>>> GetAll()
+        public async Task<ActionResult<List<AutorDTO>>> GetAll()
         {
             var result = await _context.Autores.ToListAsync();
             if (result == null) return NotFound();
-            return result;
+            return _mapper.Map<List<AutorDTO>>(result);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Autor>> GetById(int id)
+        public async Task<ActionResult<AutorDTO>> GetById(int id)
         {
             var result = await _context.Autores.FirstOrDefaultAsync(a => a.Id == id);
             if (result == null) return NotFound();
-            return result;
+            return _mapper.Map<AutorDTO>(result); ;
         }
 
 
