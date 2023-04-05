@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApiAutores.DTOs;
 using WebApiAutores.Entidades;
 
 namespace WebApiAutores.Controllers
@@ -9,10 +11,12 @@ namespace WebApiAutores.Controllers
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public AutoresController(ApplicationDbContext context)
+        public AutoresController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -33,9 +37,10 @@ namespace WebApiAutores.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult> Create(Autor autor)
+        public async Task<ActionResult> Create(AutorCreacionDTO autor)
         {
-            _context.Autores.Add(autor);
+            var result = _mapper.Map<Autor>(autor);
+            _context.Autores.Add(result);
             await _context.SaveChangesAsync();
             return Ok();
         }
