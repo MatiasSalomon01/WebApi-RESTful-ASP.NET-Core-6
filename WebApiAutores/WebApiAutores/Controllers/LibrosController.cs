@@ -35,6 +35,18 @@ namespace WebApiAutores.Controllers
             //var result = await _context.Autores.AnyAsync(l => l.Id == libro.AutorId);
             //if (!result) return BadRequest($"No existe el autor Id: {libro.AutorId}");
 
+            if(libro.AutoresId == null) return BadRequest("No se puede creaer un libro sin autores");
+
+            var autoresId = await _context.Autores
+                .Where(a => libro.AutoresId.Contains(a.Id))
+                .Select(a => a.Id)
+                .ToListAsync();
+
+            if(libro.AutoresId.Count != autoresId.Count)
+            {
+                return BadRequest("No existe uno de los autores enviados");
+            }
+
             _context.Libros.Add(_mapper.Map<Libro>(libro));
             await _context.SaveChangesAsync();
             return Ok();
