@@ -10,6 +10,8 @@ namespace WebApiAutores.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -24,7 +26,6 @@ namespace WebApiAutores.Controllers
         }
 
         [HttpGet]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<List<AutorDTO>>> GetAll()
         {
             var result = await _context.Autores.ToListAsync();
@@ -33,6 +34,7 @@ namespace WebApiAutores.Controllers
         }
 
         [HttpGet("{id:int}", Name = "obtenerAutor")]
+        [AllowAnonymous]
         public async Task<ActionResult<AutorDTOConLibros>> GetById(int id)
         {
             var result = await _context.Autores
