@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiAutores.DTOs;
@@ -19,12 +20,20 @@ namespace WebApiAutores.Controllers
             _context = context;
             _mapper = mapper;
         }
+        [HttpGet]
+        public async Task<ActionResult<List<LibroDTO>>> GetAll()
+        {
+            var result = await _context.Libros.ProjectTo<LibroDTO>(_mapper.ConfigurationProvider).ToListAsync();
+            return result;
+        }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<LibroDTO>> Get(int id)
+        public async Task<ActionResult<LibroDTO>> GetById(int id)
         {
             var result = await _context.Libros
                 .Include(l => l.Comentarios)
+                .Include(l => l.AutoresLibros)
+                .ThenInclude(l => l.Autor)
                 .FirstOrDefaultAsync(l => l.Id == id);
             return _mapper.Map<LibroDTO>(result);
         }
