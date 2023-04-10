@@ -27,17 +27,31 @@ namespace WebApiAutores.Controllers
 
         }
 
+        [HttpGet("{id:int}", Name = "obtenerComentario")]
+        public async Task<ActionResult<ComentarioDTO>> GetById(int id)
+        {
+            var comentario = await _context.Comentarios.FirstOrDefaultAsync(c => c.Id == id);
+            if(comentario == null) return NotFound();
+
+
+            return _mapper.Map<ComentarioDTO>(comentario);
+
+        }
+
         [HttpPost]
-        public async Task<ActionResult> Create(int libroId, ComentarioCreacionDTO comentarioDTO) 
+        public async Task<ActionResult> Create(int libroId, ComentarioCreacionDTO comentarioCreacionDTO) 
         {
             var result = await _context.Libros.AnyAsync(l => l.Id == libroId);
             if (!result) return NotFound();
 
-            var comentario = _mapper.Map<Comentario>(comentarioDTO);
+            var comentario = _mapper.Map<Comentario>(comentarioCreacionDTO);
             comentario.LibroId = libroId;
             _context.Add(comentario);
             await _context.SaveChangesAsync();
-            return Ok();
+
+            var comentarioDTO = _mapper.Map<ComentarioDTO>(comentario);
+
+            return CreatedAtRoute("obtenerComentario", new { id = comentario.Id, libroId }, comentarioDTO);
         }
     }
 }

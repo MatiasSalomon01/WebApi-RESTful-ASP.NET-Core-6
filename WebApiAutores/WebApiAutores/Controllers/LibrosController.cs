@@ -27,7 +27,7 @@ namespace WebApiAutores.Controllers
             return result;
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "obtenerLibro")]
         public async Task<ActionResult<LibroDTOConAutores>> GetById(int id)
         {
             var result = await _context.Libros
@@ -55,10 +55,14 @@ namespace WebApiAutores.Controllers
             {
                 return BadRequest("No existe uno de los autores enviados");
             }
+            var result = _mapper.Map<Libro>(libro);
 
-            _context.Libros.Add(_mapper.Map<Libro>(libro));
+            _context.Libros.Add(result);
             await _context.SaveChangesAsync();
-            return Ok();
+
+            var libroDTO = _mapper.Map<LibroDTO>(result);
+
+            return CreatedAtRoute("obtenerLibro", new { id = libroDTO.Id }, libroDTO);
         }
     }
 }
