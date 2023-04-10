@@ -102,5 +102,16 @@ namespace WebApiAutores.Controllers
 
             return NoContent();
         }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var result = await _context.Libros.AnyAsync(a => a.Id == id);
+            if (!result) return NotFound();
+
+            _context.Remove(new Libro() { Id = id });
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
     }
 }
