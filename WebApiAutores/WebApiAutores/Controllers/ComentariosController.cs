@@ -53,5 +53,21 @@ namespace WebApiAutores.Controllers
 
             return CreatedAtRoute("obtenerComentario", new { id = comentario.Id, libroId }, comentarioDTO);
         }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Put(int libroId, int id, ComentarioCreacionDTO comentarioCreacionDTO)
+        {
+            var existeLibro = await _context.Libros.AnyAsync(l => l.Id == libroId);
+            if(!existeLibro) return NotFound();
+            var existeComentario = await _context.Comentarios.AnyAsync(l => l.Id == id);
+            if (!existeComentario) return NotFound();
+
+            var comentario = _mapper.Map<Comentario>(comentarioCreacionDTO);
+            comentario.Id = id;
+            comentario.LibroId = libroId;
+            _context.Comentarios.Update(comentario);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }
