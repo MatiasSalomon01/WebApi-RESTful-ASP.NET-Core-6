@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiAutores.DTOs;
@@ -21,13 +23,8 @@ namespace WebApiAutores.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet("get-config")]
-        public ActionResult<string> GetConfig()
-        {
-            return _configuration["ConnectionStrings:DefaultConnection"];
-        }
-
         [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<List<AutorDTO>>> GetAll()
         {
             var result = await _context.Autores.ToListAsync();
