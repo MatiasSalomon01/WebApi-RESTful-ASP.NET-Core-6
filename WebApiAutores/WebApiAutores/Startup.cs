@@ -14,8 +14,9 @@ namespace WebApiAutores
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers().AddJsonOptions(json => 
-                json.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+            services.AddControllers()
+                .AddJsonOptions(json => json.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles)
+                .AddNewtonsoftJson();
 
             services.AddDbContext<ApplicationDbContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));

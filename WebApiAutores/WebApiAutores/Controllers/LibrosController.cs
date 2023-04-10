@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.Internal.TypeHandlers;
 using WebApiAutores.DTOs;
 using WebApiAutores.Entidades;
 
@@ -79,8 +81,26 @@ namespace WebApiAutores.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
 
+        [HttpPatch("{id:int}")]
+        public async Task<ActionResult> Patch(int id, JsonPatchDocument<LibroPatchDTO> patchDocument)
+        {
+            if (patchDocument == null) return BadRequest();
 
+            var libroDB = await _context.Libros.FirstOrDefaultAsync(l => l.Id == id);
+            if(libroDB == null) return NotFound();
+
+            var libroDTO = _mapper.Map<LibroPatchDTO>(libroDB);
+            patchDocument.ApplyTo(libroDTO, ModelState);
+
+            var esValido = TryValidateModel(libroDTO);
+            if(!esValido) return BadRequest(ModelState);
+
+            _mapper.Map(libroDTO, libroDB);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
