@@ -17,11 +17,13 @@ namespace WebApiAutores.Controllers
     {
         private readonly UserManager<IdentityUser> userManager;
         private readonly IConfiguration configuration;
+        private readonly SignInManager<IdentityUser> signInManager;
 
-        public CuentasController(UserManager<IdentityUser> userManager, IConfiguration configuration)
+        public CuentasController(UserManager<IdentityUser> userManager, IConfiguration configuration, SignInManager<IdentityUser> signInManager)
         {
             this.userManager = userManager;
             this.configuration = configuration;
+            this.signInManager = signInManager;
         }
 
         [HttpPost("registrar")]
@@ -43,7 +45,26 @@ namespace WebApiAutores.Controllers
             {
                 return BadRequest(resultado.Errors);   
             }
-        }  
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<RespuestaAutenticacion>> Login(CrendencialesUsuario credencialesUsuario)
+        {
+            var resultado = await signInManager.PasswordSignInAsync(
+                credencialesUsuario.Email,
+                credencialesUsuario.Password,
+                isPersistent: false,
+                lockoutOnFailure: false);
+
+            if (resultado.Succeeded)
+            {
+                return ConstuirToken(credencialesUsuario);
+            }
+            else
+            {
+                return BadRequest("login incorrecto");
+            }
+        }
 
         private RespuestaAutenticacion ConstuirToken(CrendencialesUsuario credencialesUsuario)
         {
