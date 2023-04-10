@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -39,7 +41,7 @@ namespace WebApiAutores.Controllers
 
             if(resultado.Succeeded) 
             {
-                return ConstuirToken(credencialesUsuario);
+                return ConstruirToken(credencialesUsuario);
             } 
             else
             {
@@ -58,7 +60,7 @@ namespace WebApiAutores.Controllers
 
             if (resultado.Succeeded)
             {
-                return ConstuirToken(credencialesUsuario);
+                return ConstruirToken(credencialesUsuario);
             }
             else
             {
@@ -66,7 +68,21 @@ namespace WebApiAutores.Controllers
             }
         }
 
-        private RespuestaAutenticacion ConstuirToken(CrendencialesUsuario credencialesUsuario)
+        [HttpGet("renovar-token")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public ActionResult<RespuestaAutenticacion> Renovar()
+        {
+            var emailClaim = HttpContext.User.Claims.Where(c => c.Type == "email").FirstOrDefault();
+            var email = emailClaim.Value;
+            var credencialesUsuario = new CrendencialesUsuario()
+            {
+                Email = email,
+            };
+            return ConstruirToken(credencialesUsuario);
+        }
+
+
+        private RespuestaAutenticacion ConstruirToken(CrendencialesUsuario credencialesUsuario)
         {
             var claims = new List<Claim>()
             {
@@ -76,7 +92,7 @@ namespace WebApiAutores.Controllers
             var llave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["llaveJwt"])); //llave secreta 
             var creds = new SigningCredentials(llave, SecurityAlgorithms.HmacSha256);
 
-            var expiration = DateTime.UtcNow.AddDays(1);
+            var expiration = DateTime.UtcNow.AddDays(30;
 
             var securityToken = new JwtSecurityToken(
                 issuer: null, 
