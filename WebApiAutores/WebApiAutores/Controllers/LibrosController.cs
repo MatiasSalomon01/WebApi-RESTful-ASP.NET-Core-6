@@ -64,5 +64,23 @@ namespace WebApiAutores.Controllers
 
             return CreatedAtRoute("obtenerLibro", new { id = libroDTO.Id }, libroDTO);
         }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Put(int id, LibroCreacionDTO libroCreacionDTO)
+        {
+            var libroDB = await _context.Libros
+                .Include(a => a.AutoresLibros)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (libroDB == null) return NotFound();
+
+            libroDB = _mapper.Map(libroCreacionDTO, libroDB);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+
+
+        }
     }
 }
