@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiAutores.DTOs;
 using WebApiAutores.Entidades;
+using WebApiAutores.Utilidades;
 
 namespace WebApiAutores.Controllers
 {
@@ -26,9 +27,18 @@ namespace WebApiAutores.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<AutorDTO>>> GetAll()
+        public async Task<ActionResult<List<AutorDTO>>> GetAll([FromQuery] PaginacionDTO paginacionDTO)
         {
-            var result = await _context.Autores.ToListAsync();
+
+            var queryable = _context.Autores.AsQueryable();
+            await HttpContext.InsertarParametrosPaginacionCabecera(queryable);
+
+            //var result = await _context.Autores.ToListAsync();
+            var result = await queryable
+                .OrderBy(x => x.Nombre)
+                .Paginar(paginacionDTO)
+                .ToListAsync();
+
             if (result == null) return NotFound();
             return _mapper.Map<List<AutorDTO>>(result);
         }
