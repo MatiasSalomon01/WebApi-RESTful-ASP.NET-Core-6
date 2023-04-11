@@ -20,6 +20,8 @@ namespace PeliculasApi
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddAutoMapper(typeof(Startup));
+
             services.AddEndpointsApiExplorer();
 
             services.AddCors(opciones =>
@@ -33,11 +35,11 @@ namespace PeliculasApi
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseSwagger();
+            //    app.UseSwaggerUI();
+            //}
 
             app.UseHttpsRedirection();
 

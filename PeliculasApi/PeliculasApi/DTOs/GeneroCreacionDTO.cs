@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PeliculasApi.Entidades
+namespace PeliculasApi.DTOs
 {
-    public class Genero
+    public class GeneroCreacionDTO
     {
-        public int Id{ get; set; }
         [Required]
         [MaxLength(50)]
         public string Nombre{ get; set; }
