@@ -1,13 +1,18 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiAutores.DTOs;
 using WebApiAutores.Entidades;
+using WebApiAutores.Utilidades;
 
 namespace WebApiAutores.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "EsAdmin")]
+
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -21,21 +26,25 @@ namespace WebApiAutores.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet("get-config")]
-        public ActionResult<string> GetConfig()
-        {
-            return _configuration["ConnectionStrings:DefaultConnection"];
-        }
-
         [HttpGet]
-        public async Task<ActionResult<List<AutorDTO>>> GetAll()
+        public async Task<ActionResult<List<AutorDTO>>> GetAll([FromQuery] PaginacionDTO paginacionDTO)
         {
-            var result = await _context.Autores.ToListAsync();
+
+            var queryable = _context.Autores.AsQueryable();
+            await HttpContext.InsertarParametrosPaginacionCabecera(queryable);
+
+            //var result = await _context.Autores.ToListAsync();
+            var result = await queryable
+                .OrderBy(x => x.Nombre)
+                .Paginar(paginacionDTO)
+                .ToListAsync();
+
             if (result == null) return NotFound();
             return _mapper.Map<List<AutorDTO>>(result);
         }
 
         [HttpGet("{id:int}", Name = "obtenerAutor")]
+        [AllowAnonymous]
         public async Task<ActionResult<AutorDTOConLibros>> GetById(int id)
         {
             var result = await _context.Autores
