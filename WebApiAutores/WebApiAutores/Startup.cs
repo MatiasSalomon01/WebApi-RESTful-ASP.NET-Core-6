@@ -81,7 +81,7 @@ namespace WebApiAutores
             {
                 opciones.AddDefaultPolicy(builder =>
                 {
-                    builder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
+                    builder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin().WithExposedHeaders(new string[] {"cantidadTotalRegistros"});
                 });
             });
         }
