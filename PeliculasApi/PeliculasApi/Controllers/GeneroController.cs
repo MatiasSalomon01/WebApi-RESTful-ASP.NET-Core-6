@@ -24,7 +24,7 @@ namespace PeliculasApi.Controllers
         public async Task<IActionResult> GetAll() 
         {
             var result = _mapper.Map<List<GeneroDTO>>(await _context.Generos
-                .OrderBy(g => g.Id)
+                .OrderBy(genre => genre.Id)
                 .ToListAsync());
 
             return Ok(result);
@@ -33,7 +33,7 @@ namespace PeliculasApi.Controllers
         [HttpGet("{id:int}", Name = "ObtenterGeneroPorId")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _context.Generos.FirstOrDefaultAsync(g => g.Id == id);
+            var result = await _context.Generos.FirstOrDefaultAsync(genre => genre.Id == id);
 
             if(result == null) return NotFound($"Genero {id} no encontrado");
 
@@ -66,7 +66,7 @@ namespace PeliculasApi.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var exists = await _context.Generos.AnyAsync(g => g.Id == id);
+            var exists = await _context.Generos.AnyAsync(genre => genre.Id == id);
 
             if(!exists) return NotFound();
 
