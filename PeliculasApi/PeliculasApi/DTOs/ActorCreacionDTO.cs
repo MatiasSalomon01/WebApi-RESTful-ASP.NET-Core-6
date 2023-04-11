@@ -8,5 +8,6 @@ namespace PeliculasApi.DTOs
         [MaxLength(120)]
         public string Nombre { get; set; }
         public DateTime FechaNacimiento { get; set; }
+        public IFormFile Foto { get; set; }
     }
 }

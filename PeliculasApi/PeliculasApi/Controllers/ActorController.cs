@@ -42,11 +42,11 @@ namespace PeliculasApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ActorCreacionDTO actorCreacionDTO)
+        public async Task<IActionResult> Create([FromForm] ActorCreacionDTO actorCreacionDTO)
         {
             var result = _mapper.Map<Actor>(actorCreacionDTO);
             _context.Actores.Add(result);
-            await _context.SaveChangesAsync();
+            //await _context.SaveChangesAsync();
 
             var mappedResult = _mapper.Map<ActorDTO>(result);
 
@@ -54,7 +54,7 @@ namespace PeliculasApi.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, ActorCreacionDTO actorCreacionDTO)
+        public async Task<IActionResult> Update(int id, [FromForm] ActorCreacionDTO actorCreacionDTO)
         {
             var result = _mapper.Map<Actor>(actorCreacionDTO);
             result.Id = id;
