@@ -41,6 +41,8 @@ namespace PeliculasApi
             //    app.UseSwaggerUI();
             //}
 
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
             app.UseHttpsRedirection();
 
             app.UseRouting();

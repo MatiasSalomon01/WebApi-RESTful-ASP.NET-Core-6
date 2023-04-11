@@ -30,7 +30,7 @@ namespace PeliculasApi.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{id:int}", Name = "ObtenterGeneroPorId")]
+        [HttpGet("{id:int}", Name = "ObtenerGeneroPorId")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _context.Generos.FirstOrDefaultAsync(genre => genre.Id == id);
@@ -48,7 +48,7 @@ namespace PeliculasApi.Controllers
             _context.Generos.Add(result);
             await _context.SaveChangesAsync();
 
-            return CreatedAtRoute("ObtenterGeneroPorId", new { id = result.Id }, result);
+            return CreatedAtRoute("ObtenerGeneroPorId", new { id = result.Id }, result);
         }
 
         [HttpPut("{id:int}")]
@@ -70,7 +70,7 @@ namespace PeliculasApi.Controllers
 
             if(!exists) return NotFound();
 
-            _context.Remove(new Genero() { Id = id});
+            _context.Generos.Remove(new Genero() { Id = id});
             await _context.SaveChangesAsync();
             
             return NoContent();
