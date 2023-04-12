@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PeliculasApi.DTOs;
 using PeliculasApi.Entidades;
+using PeliculasApi.Migrations;
 using PeliculasApi.Servicios;
 
 namespace PeliculasApi.Controllers
@@ -56,7 +57,7 @@ namespace PeliculasApi.Controllers
                     pelicula.Poster = await _almacenadorArchivos.GuardarArchivo(contenido, extension, contenedor, peliculaCreacionDTO.Poster.ContentType);
                 }
             }
-            
+            AsignarOrdenActores(pelicula);
             _context.Peliculas.Add(pelicula);
             await _context.SaveChangesAsync();
 
@@ -64,10 +65,24 @@ namespace PeliculasApi.Controllers
             return CreatedAtRoute("ObtenerPeliculaPorId", new { id = result.Id }, result);
         }
 
+        private void AsignarOrdenActores(Pelicula pelicula)
+        {
+            if(pelicula.PeliculaActores != null)
+            {
+                for(int i = 0; i < pelicula.PeliculaActores.Count; i++)
+                {
+                    pelicula.PeliculaActores[i].Orden = i;
+                }
+            }
+        }
+
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromForm] PeliculaCreacionDTO peliculaCreacionDTO)
         {
-            var peliculaDB = await _context.Peliculas.FirstOrDefaultAsync(a => a.Id == id);
+            var peliculaDB = await _context.Peliculas
+                .Include(a => a.PeliculaActores)
+                .Include(a => a.PeliculaGeneros)
+                .FirstOrDefaultAsync(a => a.Id == id);
 
             if (peliculaDB == null) return NotFound();
 
@@ -83,6 +98,7 @@ namespace PeliculasApi.Controllers
                     peliculaDB.Poster = await _almacenadorArchivos.EditarArchivo(contenido, extension, contenedor, peliculaDB.Poster, peliculaCreacionDTO.Poster.ContentType);
                 }
             }
+            AsignarOrdenActores(peliculaDB);
             _context.Peliculas.Update(peliculaDB);
             await _context.SaveChangesAsync();
 

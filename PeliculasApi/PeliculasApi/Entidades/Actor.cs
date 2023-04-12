@@ -11,5 +11,8 @@ namespace PeliculasApi.Entidades
         public string Nombre{ get; set; }
         public DateTime FechaNacimiento{ get; set; }
         public string Foto{ get; set; }
+
+        public List<PeliculaActor> PeliculaActores { get; set; }
+
     }
 }
