@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PeliculasApi.DTOs;
 using PeliculasApi.Entidades;
+using PeliculasApi.Servicios;
 
 namespace PeliculasApi.Controllers
 {
@@ -13,11 +14,14 @@ namespace PeliculasApi.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IAlmacenadorArchivos _almacenadorArchivos;
+        private readonly string contenedor = "actors";
 
-        public ActorController(ApplicationDbContext context, IMapper mapper)
+        public ActorController(ApplicationDbContext context, IMapper mapper, IAlmacenadorArchivos almacenadorArchivos)
         {
             _context = context;
             _mapper = mapper;
+            _almacenadorArchivos = almacenadorArchivos;
         }
 
         [HttpGet]
@@ -45,21 +49,45 @@ namespace PeliculasApi.Controllers
         public async Task<IActionResult> Create([FromForm] ActorCreacionDTO actorCreacionDTO)
         {
             var result = _mapper.Map<Actor>(actorCreacionDTO);
+
+            if(actorCreacionDTO.Foto != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await actorCreacionDTO.Foto.CopyToAsync(memoryStream);
+                    var contenido = memoryStream.ToArray();
+                    var extension = Path.GetExtension(actorCreacionDTO.Foto.FileName);
+                    result.Foto = await _almacenadorArchivos.GuardarArchivo(contenido, extension, contenedor, actorCreacionDTO.Foto.ContentType);
+                }
+            }
+
             _context.Actores.Add(result);
-            //await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             var mappedResult = _mapper.Map<ActorDTO>(result);
-
             return CreatedAtRoute("ObtenerActorPorId", new { id = result.Id }, mappedResult);
         }
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromForm] ActorCreacionDTO actorCreacionDTO)
         {
-            var result = _mapper.Map<Actor>(actorCreacionDTO);
-            result.Id = id;
+            var actorDB = await _context.Actores.FirstOrDefaultAsync(a => a.Id == id);
 
-            _context.Actores.Update(result);
+            if(actorDB == null) return NotFound();
+
+            actorDB = _mapper.Map(actorCreacionDTO, actorDB);
+
+            if(actorDB.Foto != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await actorCreacionDTO.Foto.CopyToAsync(memoryStream);
+                    var contenido = memoryStream.ToArray();
+                    var extension = Path.GetExtension(actorCreacionDTO.Foto.FileName);
+                    actorDB.Foto = await _almacenadorArchivos.EditarArchivo(contenido, extension, contenedor, actorDB.Foto, actorCreacionDTO.Foto.ContentType);
+                }
+            }
+            _context.Actores.Update(actorDB);
             await _context.SaveChangesAsync();
 
             return NoContent();
