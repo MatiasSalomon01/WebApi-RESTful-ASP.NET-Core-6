@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PeliculasApi.Servicios;
 using System.Text.Json.Serialization;
 
 namespace PeliculasApi
@@ -21,6 +22,8 @@ namespace PeliculasApi
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddTransient<IAlmacenadorArchivos, AlmacenadorArchivosAzure>();
 
             services.AddEndpointsApiExplorer();
 
