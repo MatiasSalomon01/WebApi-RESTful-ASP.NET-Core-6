@@ -12,14 +12,14 @@ namespace PeliculasApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PeliculaController : ControllerBase
+    public class PeliculaController : CustomBaseController
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly IAlmacenadorArchivos _almacenadorArchivos;
         private readonly string contenedor = "movies";
 
-        public PeliculaController(ApplicationDbContext context, IMapper mapper, IAlmacenadorArchivos almacenadorArchivos)
+        public PeliculaController(ApplicationDbContext context, IMapper mapper, IAlmacenadorArchivos almacenadorArchivos): base(context, mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -174,34 +174,13 @@ namespace PeliculasApi.Controllers
         [HttpPatch("{id:int}")]
         public async Task<IActionResult> Patch(int id, [FromBody] JsonPatchDocument<PeliculaPatchDTO> patchDocument)
         {
-            if (patchDocument == null) return BadRequest();
-
-            var entidadDB = await _context.Peliculas.FirstOrDefaultAsync(a => a.Id == id);
-            if (entidadDB == null) return NotFound();
-
-            var entidadDTO = _mapper.Map<PeliculaPatchDTO>(entidadDB);
-            patchDocument.ApplyTo(entidadDTO, ModelState);
-
-            var esValido = TryValidateModel(entidadDTO);
-            if (!esValido) return BadRequest(ModelState);
-
-            _mapper.Map(entidadDTO, entidadDB);
-
-            await _context.SaveChangesAsync();
-            return NoContent();
+            return await Patch<Pelicula, PeliculaPatchDTO>(id, patchDocument);
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var exists = await _context.Peliculas.AnyAsync(actor => actor.Id == id);
-
-            if (!exists) return NotFound();
-
-            _context.Peliculas.Remove(new Pelicula() { Id = id });
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return await Delete<Pelicula>(id);
         }
     }
 }

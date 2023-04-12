@@ -5,20 +5,19 @@ using Microsoft.EntityFrameworkCore;
 using PeliculasApi.DTOs;
 using PeliculasApi.Entidades;
 using PeliculasApi.Servicios;
-using PeliculasApi.Helpers;
 
 namespace PeliculasApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ActorController : ControllerBase
+    public class ActorController : CustomBaseController
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly IAlmacenadorArchivos _almacenadorArchivos;
         private readonly string contenedor = "actors";
 
-        public ActorController(ApplicationDbContext context, IMapper mapper, IAlmacenadorArchivos almacenadorArchivos)
+        public ActorController(ApplicationDbContext context, IMapper mapper, IAlmacenadorArchivos almacenadorArchivos): base(context, mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -26,30 +25,15 @@ namespace PeliculasApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] PaginacionDTO paginacionDTO)
+        public async Task<IActionResult> GetAllWithFilters([FromQuery] PaginacionDTO paginacionDTO)
         {
-            var queryable = _context.Actores.AsQueryable();
-
-            await HttpContext.InsertarParametrosPaginacion(queryable, paginacionDTO.CantidadRegistrosPorPagina);
-            
-            var entidad = await queryable.Paginar(paginacionDTO)
-                .OrderBy(actor => actor.Id)
-                .ToListAsync();
-
-            var result = _mapper.Map<List<ActorDTO>>(entidad);
-
-            return Ok(result);
+            return await GetAllWithFilters<Actor, ActorDTO>(paginacionDTO);
         }
 
         [HttpGet("{id:int}", Name = "ObtenerActorPorId")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _context.Actores.FirstOrDefaultAsync(actor => actor.Id == id);
-
-            if (result == null) return NotFound($"Actor {id} no encontrado");
-
-            var mappedResult = _mapper.Map<ActorDTO>(result);
-            return Ok(mappedResult);
+            return await GetById<Actor, ActorDTO>(id);
         }
 
         [HttpPost]
@@ -103,34 +87,13 @@ namespace PeliculasApi.Controllers
         [HttpPatch("{id:int}")]
         public async Task<IActionResult> Patch(int id, [FromBody] JsonPatchDocument<ActorPatchDTO> patchDocument)
         {
-            if(patchDocument == null) return BadRequest();
-
-            var entidadDB = await _context.Actores.FirstOrDefaultAsync(a => a.Id == id);
-            if(entidadDB == null) return NotFound();
-
-            var entidadDTO = _mapper.Map<ActorPatchDTO>(entidadDB);
-            patchDocument.ApplyTo(entidadDTO, ModelState);
-
-            var esValido = TryValidateModel(entidadDTO);
-            if(!esValido) return BadRequest(ModelState);
-
-            _mapper.Map(entidadDTO, entidadDB);
-
-            await _context.SaveChangesAsync();
-            return NoContent();
+            return await Patch<Actor, ActorPatchDTO>(id, patchDocument);
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var exists = await _context.Actores.AnyAsync(actor => actor.Id == id);
-
-            if (!exists) return NotFound();
-
-            _context.Actores.Remove(new Actor() { Id = id });
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return await Delete<Actor>(id);
         }
     }
 }

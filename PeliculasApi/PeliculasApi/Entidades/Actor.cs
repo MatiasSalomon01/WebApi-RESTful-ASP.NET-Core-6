@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PeliculasApi.Entidades
 {
-    public class Actor
+    public class Actor: IId
     {
         public int Id{ get; set; }
         [Required]
