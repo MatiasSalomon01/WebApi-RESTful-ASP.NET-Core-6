@@ -23,6 +23,12 @@ namespace PeliculasApi.Helpers
                 .ForMember(src => src.PeliculaGeneros, options => options.MapFrom(MapPeliculaGeneros));
 
             CreateMap<PeliculaPatchDTO, Pelicula>().ReverseMap();
+
+            CreateMap<Pelicula, PeliculaDetallesDTO>()
+                .ForMember(x => x.Generos, opt => opt.MapFrom(MapPeliculaGeneros))
+                .ForMember(x => x.Actores, opt => opt.MapFrom(MapPeliculaActores));
+
+
         }
 
         private List<PeliculaGenero> MapPeliculaGeneros(PeliculaCreacionDTO peliculaCreacionDTO, Pelicula pelicula)
@@ -45,7 +51,46 @@ namespace PeliculasApi.Helpers
 
             foreach (var actor in peliculaCreacionDTO.Actores)
             {
-                result.Add(new PeliculaActor { ActorId = actor.ActorId, Personaje = actor.Personaje });
+                result.Add(new PeliculaActor
+                { 
+                    ActorId = actor.ActorId, 
+                    Personaje = actor.Personaje 
+                });
+            }
+
+            return result;
+        }
+
+        private List<GeneroDTO> MapPeliculaGeneros(Pelicula pelicula, PeliculaDetallesDTO peliculaDetallesDTO)
+        {
+            var result = new List<GeneroDTO>();
+            if (pelicula.PeliculaGeneros == null) return result;
+
+            foreach (var generoPelicula in pelicula.PeliculaGeneros)
+            {
+                result.Add(new GeneroDTO
+                {
+                    Id = generoPelicula.GeneroId, 
+                    Nombre = generoPelicula.Genero.Nombre 
+                });
+            }
+
+            return result;
+        }
+
+        private List<ActorPeliculaDetalleDTO> MapPeliculaActores(Pelicula pelicula, PeliculaDetallesDTO peliculaDetallesDTO)
+        {
+            var result = new List<ActorPeliculaDetalleDTO>();
+            if (pelicula.PeliculaActores == null) return result;
+
+            foreach (var actorPelicula in pelicula.PeliculaActores)
+            {
+                result.Add(new ActorPeliculaDetalleDTO
+                {
+                    ActorId = actorPelicula.ActorId, 
+                    Personaje = actorPelicula.Personaje, 
+                    NombrePersona = actorPelicula.Actor.Nombre
+                });
             }
 
             return result;

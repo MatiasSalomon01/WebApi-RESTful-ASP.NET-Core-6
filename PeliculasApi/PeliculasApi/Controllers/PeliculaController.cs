@@ -95,10 +95,16 @@ namespace PeliculasApi.Controllers
         [HttpGet("{id:int}", Name = "ObtenerPeliculaPorId")]
         public async Task<IActionResult> GetById(int id)
         {
-            var pelicula = await _context.Peliculas.FirstOrDefaultAsync(p => p.Id == id);
+            var pelicula = await _context.Peliculas
+                .Include(x => x.PeliculaActores).ThenInclude(x => x.Actor)
+                .Include(x => x.PeliculaGeneros).ThenInclude(x => x.Genero)
+                .FirstOrDefaultAsync(p => p.Id == id);
             if(pelicula== null) return NotFound();
 
-            var result = _mapper.Map<PeliculaDTO>(pelicula);
+            pelicula.PeliculaActores = pelicula.PeliculaActores.OrderBy(x => x.Orden).ToList();
+            //pelicula.PeliculaActores = pelicula.PeliculaActores.OrderBy(x => x.Orden).ToList();
+
+            var result = _mapper.Map<PeliculaDetallesDTO>(pelicula);
             return Ok(result);
         }
 
