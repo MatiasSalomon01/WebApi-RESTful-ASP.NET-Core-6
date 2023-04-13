@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 using PeliculasApi.DTOs;
 using PeliculasApi.Entidades;
 
@@ -6,21 +8,21 @@ namespace PeliculasApi.Helpers
 {
     public class AutomapperProfiles: Profile
     {
-        public AutomapperProfiles()
+        public AutomapperProfiles(GeometryFactory geometryFactory)
         {
             CreateMap<Genero, GeneroDTO>().ReverseMap();
             CreateMap<GeneroCreacionDTO, Genero>();
 
             CreateMap<Actor, ActorDTO>().ReverseMap();
             CreateMap<ActorCreacionDTO, Actor>()
-                .ForMember(src => src.Foto, options => options.Ignore());
+                .ForMember(src => src.Foto, opt => opt.Ignore());
             CreateMap<ActorPatchDTO, Actor>().ReverseMap();
             
             CreateMap<Pelicula, PeliculaDTO>().ReverseMap();
             CreateMap<PeliculaCreacionDTO, Pelicula>()
-                .ForMember(src => src.Poster, options => options.Ignore())
-                .ForMember(src => src.PeliculaActores, options => options.MapFrom(MapPeliculaActores))
-                .ForMember(src => src.PeliculaGeneros, options => options.MapFrom(MapPeliculaGeneros));
+                .ForMember(src => src.Poster, opt => opt.Ignore())
+                .ForMember(src => src.PeliculaActores, opt => opt.MapFrom(MapPeliculaActores))
+                .ForMember(src => src.PeliculaGeneros, opt => opt.MapFrom(MapPeliculaGeneros));
 
             CreateMap<PeliculaPatchDTO, Pelicula>().ReverseMap();
 
@@ -28,8 +30,17 @@ namespace PeliculasApi.Helpers
                 .ForMember(x => x.Generos, opt => opt.MapFrom(MapPeliculaGeneros))
                 .ForMember(x => x.Actores, opt => opt.MapFrom(MapPeliculaActores));
 
-            CreateMap<SalaDeCine, SalaDeCineDTO>().ReverseMap();
-            CreateMap<SalaDeCineCreacionDTO, SalaDeCine>();
+            CreateMap<SalaDeCine, SalaDeCineDTO>()
+                .ForMember(x => x.Latitud, opt => opt.MapFrom(y => y.Ubicacion.Y))
+                .ForMember(x => x.Longitud, opt => opt.MapFrom(y => y.Ubicacion.X));
+
+            CreateMap<SalaDeCineDTO, SalaDeCine>()
+                .ForMember(x => x.Ubicacion, opt => opt.MapFrom(y =>
+                    geometryFactory.CreatePoint(new Coordinate(y.Longitud, y.Latitud))));
+
+            CreateMap<SalaDeCineCreacionDTO, SalaDeCine>()
+                .ForMember(x => x.Ubicacion, opt => opt.MapFrom(y =>
+                    geometryFactory.CreatePoint(new Coordinate(y.Longitud, y.Latitud))));
         }
 
         private List<PeliculaGenero> MapPeliculaGeneros(PeliculaCreacionDTO peliculaCreacionDTO, Pelicula pelicula)

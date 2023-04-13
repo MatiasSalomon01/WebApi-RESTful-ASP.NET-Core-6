@@ -37,6 +37,19 @@ namespace PeliculasApi.Controllers
             return await Create<SalaDeCineCreacionDTO, SalaDeCine, SalaDeCineDTO>(salaDeCineCreacionDTO, "ObtenerSalaDeCinePorId");
         }
 
+        [HttpPost("{id:int}/AgregarPelicula/{peliculaId}")]
+        public async Task<IActionResult> AddMovieToCinemaRoom(int id, int peliculaId)
+        {
+            var peliculasSalaDeCine = new PeliculaSalaDeCine()
+            { 
+                PeliculaId = peliculaId, SalaDeCineId = id
+            };
+
+            _context.PeliculasSalasDeCines.Add(peliculasSalaDeCine);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, SalaDeCineCreacionDTO salaDeCineCreacionDTO)
         {
