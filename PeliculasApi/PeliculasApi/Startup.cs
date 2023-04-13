@@ -28,7 +28,7 @@ namespace PeliculasApi
                 postgresOptions => postgresOptions.UseNetTopologySuite()));
 
             services.AddAutoMapper(typeof(Startup));
-
+            
             services.AddTransient<IAlmacenadorArchivos, AlmacenadorArchivosAzure>();
 
             services.AddSingleton<GeometryFactory>(NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326));

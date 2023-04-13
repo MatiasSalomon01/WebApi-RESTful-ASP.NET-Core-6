@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
 using PeliculasApi.DTOs;
 using PeliculasApi.Entidades;
 
@@ -12,11 +14,13 @@ namespace PeliculasApi.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        private readonly GeometryFactory _geometryFactory;
 
-        public SalaDeCineController(ApplicationDbContext context, IMapper mapper) : base(context, mapper)
+        public SalaDeCineController(ApplicationDbContext context, IMapper mapper, GeometryFactory geometryFactory) : base(context, mapper)
         {
             _context = context;
             _mapper = mapper;
+            _geometryFactory = geometryFactory;
         }
 
         [HttpGet]
@@ -29,6 +33,25 @@ namespace PeliculasApi.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             return await GetById<SalaDeCine, SalaDeCineDTO>(id);
+        }
+
+        [HttpGet("Cercanos")]
+        public async Task<IActionResult> GetNearCinemaRooms([FromQuery] SalaDeCineCercanoFiltroDTO filtro)
+        {
+            var ubicacionUsuario = _geometryFactory.CreatePoint(new Coordinate(filtro.Longitud, filtro.Latitud));
+            var salasDeCine = await _context.SalaDeCine
+                .OrderBy(x => x.Ubicacion.Distance(ubicacionUsuario))
+                .Where(x => x.Ubicacion.IsWithinDistance(ubicacionUsuario, filtro.DistanciaEnKms*1000))
+                .Select(x => new SalaDeCineCercanoDTO
+                {
+                    Id = x.Id,
+                    Nombre = x.Nombre,
+                    Latitud = x.Ubicacion.Y,
+                    Longitud = x.Ubicacion.X,
+                    DistanciaEnMetros = x.Ubicacion.Distance(ubicacionUsuario)
+                }).ToListAsync();
+
+            return Ok(salasDeCine);
         }
 
         [HttpPost]
