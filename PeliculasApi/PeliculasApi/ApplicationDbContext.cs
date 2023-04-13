@@ -18,6 +18,9 @@ namespace PeliculasApi
             modelBuilder.Entity<PeliculaGenero>()
                 .HasKey(x => new { x.GeneroId, x.PeliculaId });
 
+            modelBuilder.Entity<PeliculaSalaDeCine>()
+                .HasKey(x => new { x.PeliculaId, x.SalaDeCineId });
+
             SeedData(modelBuilder);
 
             base.OnModelCreating(modelBuilder);
@@ -120,5 +123,6 @@ namespace PeliculasApi
         public DbSet<Pelicula> Peliculas { get; set; }
         public DbSet<PeliculaActor> PeliculasActores { get; set; }
         public DbSet<PeliculaGenero> PeliculasGeneros { get; set; }
+        public DbSet<PeliculaSalaDeCine> PeliculasSalasDeCines { get; set; }
     }
 }

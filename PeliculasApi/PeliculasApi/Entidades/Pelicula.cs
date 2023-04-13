@@ -14,5 +14,6 @@ namespace PeliculasApi.Entidades
 
         public List<PeliculaActor> PeliculaActores { get; set; }
         public List<PeliculaGenero> PeliculaGeneros { get; set; }
+        public List<PeliculaSalaDeCine> PeliculasSalaDeCines { get; set; }
     }
 }

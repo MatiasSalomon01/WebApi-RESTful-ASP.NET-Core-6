@@ -28,7 +28,8 @@ namespace PeliculasApi.Helpers
                 .ForMember(x => x.Generos, opt => opt.MapFrom(MapPeliculaGeneros))
                 .ForMember(x => x.Actores, opt => opt.MapFrom(MapPeliculaActores));
 
-
+            CreateMap<SalaDeCine, SalaDeCineDTO>().ReverseMap();
+            CreateMap<SalaDeCineCreacionDTO, SalaDeCine>();
         }
 
         private List<PeliculaGenero> MapPeliculaGeneros(PeliculaCreacionDTO peliculaCreacionDTO, Pelicula pelicula)
