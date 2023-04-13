@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 using NetTopologySuite;
 using PeliculasApi.Entidades;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace PeliculasApi
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
@@ -30,6 +32,43 @@ namespace PeliculasApi
 
         private void SeedData(ModelBuilder modelBuilder)
         {
+            var rolAdminId = Guid.NewGuid();
+            var usuarioAdminId = Guid.NewGuid();
+
+            var rolAdmin = new IdentityRole() 
+            {
+                Id = rolAdminId.ToString(),
+                Name = "Admin",
+                NormalizedName = "Admin"
+            };
+
+            var passwordHasher = new PasswordHasher<IdentityUser>();
+            var username = "matias@gmail.com";
+            var usuarioAdmin = new IdentityUser()
+            {
+                Id = usuarioAdminId.ToString(),
+                UserName = username,
+                NormalizedEmail = username,
+                Email = username,
+                NormalizedUserName = username,
+                PasswordHash = passwordHasher.HashPassword(null, "Aa123456!")
+            };
+
+            //modelBuilder.Entity<IdentityUser>()
+            //    .HasData(usuarioAdmin);
+
+            //modelBuilder.Entity<IdentityRole>()
+            //    .HasData(rolAdmin);
+
+            //modelBuilder.Entity<IdentityUserClaim<string>>()
+            //    .HasData(new IdentityUserClaim<string>()
+            //    {
+            //        Id = 1,
+            //        ClaimType = ClaimTypes.Role,
+            //        UserId = usuarioAdminId.ToString(),
+            //        ClaimValue = "Admin",
+            //    });
+
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
             modelBuilder.Entity<SalaDeCine>()
